@@ -1,5 +1,5 @@
 class IronSourceConst {
-
+  static final String MAIN_CHANNEL = "com.karnadi.ironsource";
 //   Rewarded Video Listener Const
   static final String ON_REWARDED_VIDEO_AD_OPENED = "onRewardedVideoAdOpened";
   static final String ON_REWARDED_VIDEO_AD_CLOSED = "onRewardedVideoAdClosed";

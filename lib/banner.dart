@@ -15,7 +15,7 @@ class _ISBannerState extends State<ISBanner> {
           height: 50.0,
           child:AndroidView(
             key: UniqueKey(),
-            viewType: 'ironsource/banner',
+            viewType: 'com.karnadi.ironsource/banner',
 
           )
       );

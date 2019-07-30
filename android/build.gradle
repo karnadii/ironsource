@@ -1,0 +1,74 @@
+group 'com.karnadi.ironsource'
+version '1.0-SNAPSHOT'
+
+buildscript {
+    repositories {
+        google()
+        jcenter()
+          //IronSource SDK
+
+
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.2.1'
+    }
+}
+
+rootProject.allprojects {
+    repositories {
+        google()
+        jcenter()
+         maven {
+        url "https://dl.bintray.com/ironsource-mobile/android-sdk"
+        }
+        maven {
+        //IronSource Adapters   
+        url "http://dl.bintray.com/ironsource-mobile/android-adapters"
+        }
+        maven {
+        //Adcolony SDK   
+            url  "https://adcolony.bintray.com/AdColony"
+        }
+        maven {
+        //HyperMX SDK   
+            url "https://raw.githubusercontent.com/HyprMXMobile/Android-SDKs/master"
+        }
+        maven {
+        //Vungle SDK   
+                url 'https://jitpack.io'
+        }
+        maven { 
+            //Moat For Mopub
+            url "https://s3.amazonaws.com/moat-sdk-builds" 
+        }
+      
+    }
+}
+
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 28
+
+    defaultConfig {
+        minSdkVersion 26
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    lintOptions {
+        disable 'InvalidPackage'
+    }
+}
+
+
+
+dependencies {
+    //Add IronSource Mediation SDK dependency.
+    api files('libs/mediationsdk-6.9.0.jar')
+
+
+
+
+}
+
+
