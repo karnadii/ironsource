@@ -4,27 +4,18 @@ import 'package:flutter/services.dart';
 import 'package:ironsource/Ironsource_consts.dart';
 export 'banner.dart';
 
-class Ironsource {
-  static const MethodChannel _channel =  MethodChannel("com.karnadi.ironsource");
-  static  IronSourceListener _listener;
-
+class IronSource {
+  static const MethodChannel _channel = MethodChannel("com.karnadi.ironsource");
+  static IronSourceListener _listener;
   static IronSourceListener getListener() {
     return _listener;
   }
-  static Future<String> get platformVersion async {
-    final String version = await _channel.invokeMethod('getPlatformVersion');
-    return version;
-  }
 
-  static Future<Null> initialize({final String appKey, IronSourceListener listener}) async {
-    _listener=listener;
-//    _channel.setMethodCallHandler(_listener._handle);
-    await _channel.invokeMethod('initialize', {'appKey': appKey});
-  }
-
-  static void setListener(IronSourceListener listener) {
-    _listener=listener;
+  static Future<Null> initialize(
+      {final String appKey, final IronSourceListener listener}) async {
+    _listener = listener;
     _channel.setMethodCallHandler(_listener._handle);
+    await _channel.invokeMethod('initialize', {'appKey': appKey});
   }
 
   static Future<Null> loadInterstitial() async {
@@ -55,73 +46,57 @@ class Ironsource {
     return await _channel.invokeMethod('isOfferwallAvailable');
   }
 
-  static Future<Null> setListenner() async {
 
-  }
+
 }
 
-
 abstract class IronSourceListener {
-  Future<Null> _handle(MethodCall methodCall) async {
-//    if (methodCall.method == IronSourceConst.ON_BANNER_AD_CLICKED)
-//      onBannerAdClicked();
-//    else if(methodCall.method == IronSourceConst.ON_BANNER_AD_LEFT_APPLICATION)
-//      onBannerAdLeftApplication();
-//    else if(methodCall.method == IronSourceConst.ON_BANNER_AD_LOAD_FAILED)
-//      onBannerAdLoadFailed(methodCall.arguments["error"]);
-//    else if(methodCall.method == IronSourceConst.ON_BANNER_AD_LOADED)
-//      onBannerAdLoaded();
-//    else if(methodCall.method == IronSourceConst.ON_BANNER_AD_sCREEN_DISMISSED)
-//      onBannerAdScreenDismissed();
-//    else if(methodCall.method == IronSourceConst.ON_BANNER_AD_SCREEN_PRESENTED)
-//      onBannerAdScreenPresented();
+  Future<Null> _handle(MethodCall call) async {
 //    Rewarded
-   if(methodCall.method == IronSourceConst.ON_REWARDED_VIDEO_AD_CLICKED)
-    onRewardedVideoAdClicked(methodCall.arguments["placement"]);
-    else if(methodCall.method == IronSourceConst.ON_REWARDED_VIDEO_AD_CLOSED)
-    onRewardedVideoAdClosed();
-    else if(methodCall.method == IronSourceConst.ON_REWARDED_VIDEO_AD_ENDED)
-    onRewardedVideoAdEnded();
-    else if(methodCall.method == IronSourceConst.ON_REWARDED_VIDEO_AD_OPENED)
-    onRewardedVideoAdOpened();
-    else if(methodCall.method == IronSourceConst.ON_REWARDED_VIDEO_AD_REWARDED)
-    onRewardedVideoAdRewarded(methodCall.arguments["placement"]);
-    else if(methodCall.method == IronSourceConst.ON_REWARDED_VIDEO_AD_SHOW_FAILED)
-    onRewardedVideoAdShowFailed(methodCall.arguments["error"]);
-    else if(methodCall.method == IronSourceConst.ON_REWARDED_VIDEO_AVAILABILITY_CHANGED)
-    onRewardedVideoAvailabilityChanged(methodCall.arguments["available"]);
-    else if(methodCall.method == IronSourceConst.ON_REWARDED_VIDEO_AD_STARTED)
-    onRewardedVideoAdStarted();
+    if (call.method == ON_REWARDED_VIDEO_AD_CLICKED)
+      onRewardedVideoAdClicked(call.arguments);
+    else if (call.method == ON_REWARDED_VIDEO_AD_CLOSED)
+      onRewardedVideoAdClosed();
+    else if (call.method == ON_REWARDED_VIDEO_AD_ENDED)
+      onRewardedVideoAdEnded();
+    else if (call.method == ON_REWARDED_VIDEO_AD_OPENED)
+      onRewardedVideoAdOpened();
+    else if (call.method == ON_REWARDED_VIDEO_AD_REWARDED)
+      onRewardedVideoAdRewarded(call.arguments);
+    else if (call.method == ON_REWARDED_VIDEO_AD_SHOW_FAILED)
+      onRewardedVideoAdShowFailed(call.arguments);
+    else if (call.method == ON_REWARDED_VIDEO_AVAILABILITY_CHANGED)
+      onRewardedVideoAvailabilityChanged(call.arguments);
+    else if (call.method == ON_REWARDED_VIDEO_AD_STARTED)
+      onRewardedVideoAdStarted();
 // Offerwall
-    else if(methodCall.method == IronSourceConst.ON_OFFERWALL_AD_CREDITED)
-    onOfferwallAdCredited(methodCall.arguments["credit"]);
-    else if(methodCall.method == IronSourceConst.ON_OFFERWALL_AVAILABLE)
-    onOfferwallAvailable(methodCall.arguments["available"]);
-    else if(methodCall.method == IronSourceConst.ON_OFFERWALL_CLOSED)
+    else if (call.method == ON_OFFERWALL_AD_CREDITED)
+      onOfferwallAdCredited(call.arguments);
+    else if (call.method == ON_OFFERWALL_AVAILABLE)
+      onOfferwallAvailable(call.arguments);
+    else if (call.method == ON_OFFERWALL_CLOSED)
       onOfferwallClosed();
-    else if(methodCall.method == IronSourceConst.ON_OFFERWALL_CREDITS_FAILED)
-      onGetOfferwallCreditsFailed(methodCall.arguments["error"]);
-    else if(methodCall.method == IronSourceConst.ON_OFFERWALL_OPENED)
-      onOfferwallClosed();
-    else if(methodCall.method == IronSourceConst.ON_OFFERWALL_SHOW_FAILED)
-      onOfferwallShowFailed(methodCall.arguments["error"]);
+    else if (call.method == ON_OFFERWALL_CREDITS_FAILED)
+      onGetOfferwallCreditsFailed(call.arguments);
+    else if (call.method == ON_OFFERWALL_OPENED)
+      onOfferwallOpened();
+    else if (call.method == ON_OFFERWALL_SHOW_FAILED)
+      onOfferwallShowFailed(call.arguments);
 //    interstitial
-  else if(methodCall.method == IronSourceConst.ON_INTERSTITIAL_AD_CLICKED)
-    onInterstitialAdClicked();
-  else if(methodCall.method == IronSourceConst.ON_INTERSTITIAL_AD_CLOSED)
-    onInterstitialAdClosed();
-  else if(methodCall.method == IronSourceConst.ON_INTERSTITIAL_AD_OPENED)
-    onInterstitialAdOpened();
-  else if(methodCall.method == IronSourceConst.ON_INTERSTITIAL_AD_READY)
-    onInterstitialAdReady();
-  else if(methodCall.method == IronSourceConst.ON_INTERSTITIAL_AD_SHOW_SUCCEEDED)
-    onInterstitialAdShowSucceeded();
-  else if(methodCall.method == IronSourceConst.ON_INTERSTITIAL_AD_LOAD_FAILED)
-    onInterstitialAdLoadFailed(methodCall.arguments['error']);
-  else if(methodCall.method == IronSourceConst.ON_INTERSTITIAL_AD_SHOW_FAILED)
-    onInterstitialAdShowFailed(methodCall.arguments['error']);
-
-
+    else if (call.method == ON_INTERSTITIAL_AD_CLICKED)
+      onInterstitialAdClicked();
+    else if (call.method == ON_INTERSTITIAL_AD_CLOSED)
+      onInterstitialAdClosed();
+    else if (call.method == ON_INTERSTITIAL_AD_OPENED)
+      onInterstitialAdOpened();
+    else if (call.method == ON_INTERSTITIAL_AD_READY)
+      onInterstitialAdReady();
+    else if (call.method == ON_INTERSTITIAL_AD_SHOW_SUCCEEDED)
+      onInterstitialAdShowSucceeded();
+    else if (call.method == ON_INTERSTITIAL_AD_LOAD_FAILED)
+      onInterstitialAdLoadFailed(call.arguments);
+    else if (call.method == ON_INTERSTITIAL_AD_SHOW_FAILED)
+      onInterstitialAdShowFailed(call.arguments);
   }
 
   //  Rewarded video
@@ -168,18 +143,6 @@ abstract class IronSourceListener {
   void onInterstitialAdShowSucceeded();
 
   void onInterstitialAdShowFailed(Map<String, dynamic> error);
-
-//  Banner
-//  void onBannerAdLeftApplication();
-//
-//  void onBannerAdScreenDismissed();
-//
-//  void onBannerAdScreenPresented();
-//
-//  void onBannerAdClicked();
-//
-//  void onBannerAdLoaded();
-//
-//  void onBannerAdLoadFailed(Map<String, dynamic> error);
-
 }
+
+

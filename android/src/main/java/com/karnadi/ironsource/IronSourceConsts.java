@@ -3,6 +3,7 @@ package com.karnadi.ironsource;
 public class IronSourceConsts {
     static final String MAIN_CHANNEL = "com.karnadi.ironsource";
     static final String BANNER_AD_CHANNEL = MAIN_CHANNEL + "/bannerAd";
+    static final String INTERSTITIAL_CHANNEL = MAIN_CHANNEL + "/interstitialAd";
 
     static final String INIT = "initialize";
     static final String LOAD_INTERSTITIAL = "loadInterstitial";

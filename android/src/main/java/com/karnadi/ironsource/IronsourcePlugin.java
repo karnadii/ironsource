@@ -49,9 +49,7 @@ public class IronsourcePlugin implements MethodCallHandler, InterstitialListener
 
         final MethodChannel interstitialAdChannel = new MethodChannel(registrar.messenger(), IronSourceConsts.INTERSTITIAL_CHANNEL);
 
-        interstitialAdChannel
-                .setMethodCallHandler(new IronSourceInterstitial(registrar.context(),
-                        interstitialAdChannel, registrar.activity()));
+
         registrar.platformViewRegistry().registerViewFactory(IronSourceConsts.BANNER_AD_CHANNEL, new IronSourceBanner(registrar.activity(), registrar.messenger()));
     }
 
@@ -120,18 +118,14 @@ public class IronsourcePlugin implements MethodCallHandler, InterstitialListener
     public void initIronSource(String appKey, String userId) {
 
         // Set listener
+        IronSource.setInterstitialListener(this);
         IronSource.setRewardedVideoListener(this);
         IronSource.setOfferwallListener(this);
-        IronSource.setInterstitialListener(this);
-
-//        SupersonicConfig.getConfigObj().setClientSideCallbacks(true);
-
-
+        SupersonicConfig.getConfigObj().setClientSideCallbacks(true);
         // set the IronSource user id
         IronSource.setUserId(userId);
         // init the IronSource SDK
         IronSource.init(mActivity, appKey);
-
     }
 
     // Interstitial Listener

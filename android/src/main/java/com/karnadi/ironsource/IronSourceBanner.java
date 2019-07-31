@@ -26,3 +26,4 @@ public class IronSourceBanner extends PlatformViewFactory {
     }
 
 }
+

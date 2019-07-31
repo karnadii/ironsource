@@ -16,6 +16,6 @@ void main() {
   });
 
   test('getPlatformVersion', () async {
-    expect(await Ironsource.platformVersion, '42');
+    expect(await IronSource.platformVersion, '42');
   });
 }
