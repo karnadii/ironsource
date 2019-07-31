@@ -12,6 +12,10 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> with IronSourceListener {
   final String appKey = "85460dcd";
 
+  bool rewardeVideoAvailable = false,
+      offerwallAvailable = false,
+      showBanner = false,
+      interstitialReady = false;
   @override
   void initState() {
     super.initState();
@@ -21,13 +25,16 @@ class _MyAppState extends State<MyApp> with IronSourceListener {
 
   void init() async {
     await IronSource.initialize(appKey: appKey, listener: this);
+    rewardeVideoAvailable = await IronSource.isRewardedVideoAvailable();
+    offerwallAvailable = await IronSource.isOfferwallAvailable();
+    setState(() {});
   }
 
-  loadInterstitial() {
+  void loadInterstitial() {
     IronSource.loadInterstitial();
   }
 
-  showInterstitial() async {
+  void showInterstitial() async {
     if (await IronSource.isInterstitialReady()) {
       IronSource.showInterstitial();
     } else {
@@ -37,7 +44,7 @@ class _MyAppState extends State<MyApp> with IronSourceListener {
     }
   }
 
-  showOfferwall() async {
+  void showOfferwall() async {
     if (await IronSource.isOfferwallAvailable()) {
       IronSource.showOfferwall();
     } else {
@@ -45,7 +52,7 @@ class _MyAppState extends State<MyApp> with IronSourceListener {
     }
   }
 
-  showRewardedVideo() async {
+  void showRewardedVideo() async {
     if (await IronSource.isRewardedVideoAvailable()) {
       IronSource.showRewardedVideol();
     } else {
@@ -53,38 +60,61 @@ class _MyAppState extends State<MyApp> with IronSourceListener {
     }
   }
 
+  void showHideBanner() {
+    setState(() {
+      showBanner = !showBanner;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Ironsource ads demo'),
+          centerTitle: true,
+          title: const Text('IronSource ads demo'),
         ),
-        body: Column(
+        body: Stack(
           children: <Widget>[
-            FlatButton(
-              child: Text("laod interstitial"),
-              onPressed: loadInterstitial,
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 50.0),
+              alignment: Alignment.center,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  CustomButton(
+                    label: "Load interstitial",
+                    onPressed: loadInterstitial,
+                  ),
+                  CustomButton(
+                    label: "Show interstitial",
+                    onPressed: interstitialReady ? showInterstitial : null,
+                  ),
+                  CustomButton(
+                    label: "Show offerwall",
+                    onPressed: offerwallAvailable ? showOfferwall : null,
+                  ),
+                  CustomButton(
+                    label: "Show Rewarded Video",
+                    onPressed: rewardeVideoAvailable ? showRewardedVideo : null,
+                  ),
+                  CustomButton(
+                    label: showBanner?"hide banner":"Show Banner",
+                    onPressed: showHideBanner,
+                  ),
+                  
+                ],
+              ),
             ),
-            FlatButton(
-              child: Text("show interstitial"),
-              onPressed: showInterstitial,
-            ),
-            FlatButton(
-              child: Text("show offerwall"),
-              onPressed: showOfferwall,
-            ),
-            FlatButton(
-              child: Text("show rewardedVideo"),
-              onPressed: showRewardedVideo,
-            ),
-            IronSourceBannerAd(
-              keepAlive: true,
-              listener: BannerAdListener(),
-            ),
-            IronSourceBannerAd(
-              keepAlive: true,
-            ),
+// Banner ad
+            if (showBanner)
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: IronSourceBannerAd(
+                  keepAlive: true,
+                  listener: BannerAdListener()
+                ),
+              )
           ],
         ),
       ),
@@ -112,6 +142,9 @@ class _MyAppState extends State<MyApp> with IronSourceListener {
   @override
   void onInterstitialAdOpened() {
     print("onInterstitialAdOpened");
+    setState(() {
+      interstitialReady = false;
+    });
 
     // TODO: implement onInterstitialAdOpened
   }
@@ -119,7 +152,9 @@ class _MyAppState extends State<MyApp> with IronSourceListener {
   @override
   void onInterstitialAdReady() {
     print("onInterstitialAdReady");
-
+    setState(() {
+      interstitialReady = true;
+    });
     // TODO: implement onInterstitialAdReady
   }
 
@@ -127,6 +162,9 @@ class _MyAppState extends State<MyApp> with IronSourceListener {
   void onInterstitialAdShowFailed(Map<String, dynamic> error) {
     // TODO: implement onInterstitialAdShowFailed
     print("onInterstitialAdShowFailed : $error");
+    setState(() {
+      interstitialReady = false;
+    });
   }
 
   @override
@@ -151,6 +189,9 @@ class _MyAppState extends State<MyApp> with IronSourceListener {
   void onOfferwallAvailable(bool available) {
     print("onOfferwallAvailable : $available");
     // TODO: implement onOfferwallAvailable
+    setState(() {
+      offerwallAvailable = available;
+    });
   }
 
   @override
@@ -217,11 +258,13 @@ class _MyAppState extends State<MyApp> with IronSourceListener {
   void onRewardedVideoAvailabilityChanged(bool available) {
     // TODO: implement onRewardedVideoAvailabilityChanged
     print("nRewardedVideoAvailabilityChanged : $available");
+    setState(() {
+      rewardeVideoAvailable = available;
+    });
   }
 }
 
-
-class BannerAdListener extends IronSourceBannerListener{
+class BannerAdListener extends IronSourceBannerListener {
   @override
   void onBannerAdClicked() {
     // TODO: implement onBannerAdClicked
@@ -232,7 +275,6 @@ class BannerAdListener extends IronSourceBannerListener{
   void onBannerAdLeftApplication() {
     // TODO: implement onBannerAdLeftApplication
     print("onBannerAdLeftApplication");
-
   }
 
   @override
@@ -246,21 +288,42 @@ class BannerAdListener extends IronSourceBannerListener{
   void onBannerAdLoaded() {
     // TODO: implement onBannerAdLoaded
     print("onBannerAdLoaded");
-
   }
 
   @override
   void onBannerAdScreenDismissed() {
     // TODO: implement onBannerAdScreenDismissed
     print("onBannerAdScreenDismisse");
-
   }
 
   @override
   void onBannerAdScreenPresented() {
     // TODO: implement onBannerAdScreenPresented
     print("onBannerAdScreenPresented");
-
   }
+}
 
+class CustomButton extends StatelessWidget {
+  final String label;
+  final Function onPressed;
+
+  const CustomButton({Key key, this.label, this.onPressed}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 10.0),
+      child: MaterialButton(
+        minWidth: 250.0,
+        height: 50.0,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(40.0),
+            side: BorderSide(width: 2.0, color: Colors.blue)),
+        child: Text(
+          label.toUpperCase(),
+          style: TextStyle(),
+        ),
+        onPressed: onPressed,
+      ),
+    );
+  }
 }
