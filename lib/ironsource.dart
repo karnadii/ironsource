@@ -45,9 +45,6 @@ class IronSource {
   static Future<bool> isOfferwallAvailable() async {
     return await _channel.invokeMethod('isOfferwallAvailable');
   }
-
-
-
 }
 
 abstract class IronSourceListener {
@@ -144,5 +141,3 @@ abstract class IronSourceListener {
 
   void onInterstitialAdShowFailed(Map<String, dynamic> error);
 }
-
-

@@ -19,7 +19,6 @@ class _MyAppState extends State<MyApp> with IronSourceListener {
   @override
   void initState() {
     super.initState();
-//    addListener();
     init();
   }
 
@@ -99,10 +98,9 @@ class _MyAppState extends State<MyApp> with IronSourceListener {
                     onPressed: rewardeVideoAvailable ? showRewardedVideo : null,
                   ),
                   CustomButton(
-                    label: showBanner?"hide banner":"Show Banner",
+                    label: showBanner ? "hide banner" : "Show Banner",
                     onPressed: showHideBanner,
                   ),
-                  
                 ],
               ),
             ),
@@ -111,9 +109,7 @@ class _MyAppState extends State<MyApp> with IronSourceListener {
               Align(
                 alignment: Alignment.bottomCenter,
                 child: IronSourceBannerAd(
-                  keepAlive: true,
-                  listener: BannerAdListener()
-                ),
+                    keepAlive: true, listener: BannerAdListener()),
               )
           ],
         ),
@@ -123,20 +119,17 @@ class _MyAppState extends State<MyApp> with IronSourceListener {
 
   @override
   void onInterstitialAdClicked() {
-    // TODO: implement onInterstitialAdClicked
     print("onInterstitialAdClicked");
   }
 
   @override
   void onInterstitialAdClosed() {
-    // TODO: implement onInterstitialAdClosed
     print("onInterstitialAdClosed");
   }
 
   @override
   void onInterstitialAdLoadFailed(Map<String, dynamic> error) {
-    // TODO: implement onInterstitialAdLoadFailed
-    print("onInterstitialAdLoadFailed : $error");
+      print("onInterstitialAdLoadFailed : $error");
   }
 
   @override
@@ -146,7 +139,7 @@ class _MyAppState extends State<MyApp> with IronSourceListener {
       interstitialReady = false;
     });
 
-    // TODO: implement onInterstitialAdOpened
+ 
   }
 
   @override
@@ -155,12 +148,12 @@ class _MyAppState extends State<MyApp> with IronSourceListener {
     setState(() {
       interstitialReady = true;
     });
-    // TODO: implement onInterstitialAdReady
+  
   }
 
   @override
   void onInterstitialAdShowFailed(Map<String, dynamic> error) {
-    // TODO: implement onInterstitialAdShowFailed
+
     print("onInterstitialAdShowFailed : $error");
     setState(() {
       interstitialReady = false;
@@ -169,26 +162,25 @@ class _MyAppState extends State<MyApp> with IronSourceListener {
 
   @override
   void onInterstitialAdShowSucceeded() {
-    // TODO: implement onInterstitialAdShowSucceeded
     print("nInterstitialAdShowSucceeded");
   }
 
   @override
   void onGetOfferwallCreditsFailed(Map<String, dynamic> error) {
-    // TODO: implement onGetOfferwallCreditsFailed
+
     print("onGetOfferwallCreditsFailed : $error");
   }
 
   @override
   void onOfferwallAdCredited(Map<String, dynamic> reward) {
-    // TODO: implement onOfferwallAdCredited
+
     print("onOfferwallAdCredited : $reward");
   }
 
   @override
   void onOfferwallAvailable(bool available) {
     print("onOfferwallAvailable : $available");
-    // TODO: implement onOfferwallAvailable
+
     setState(() {
       offerwallAvailable = available;
     });
@@ -196,7 +188,6 @@ class _MyAppState extends State<MyApp> with IronSourceListener {
 
   @override
   void onOfferwallClosed() {
-    // TODO: implement onOfferwallClosed
     print("onOfferwallClosed");
   }
 
@@ -212,7 +203,7 @@ class _MyAppState extends State<MyApp> with IronSourceListener {
 
   @override
   void onRewardedVideoAdClicked(Map placement) {
-    // TODO: implement onRewardedVideoAdClicked
+   
     print("onRewardedVideoAdClicked");
   }
 
@@ -220,32 +211,30 @@ class _MyAppState extends State<MyApp> with IronSourceListener {
   void onRewardedVideoAdClosed() {
     print("onRewardedVideoAdClosed");
 
-    // TODO: implement onRewardedVideoAdClosed
   }
 
   @override
   void onRewardedVideoAdEnded() {
     print("onRewardedVideoAdEnded");
 
-    // TODO: implement onRewardedVideoAdEnded
+
   }
 
   @override
   void onRewardedVideoAdOpened() {
     print("onRewardedVideoAdOpened");
 
-    // TODO: implement onRewardedVideoAdOpened
   }
 
   @override
   void onRewardedVideoAdRewarded(Map placement) {
-    // TODO: implement onRewardedVideoAdRewarded
+
     print("onRewardedVideoAdRewarded: $placement");
   }
 
   @override
   void onRewardedVideoAdShowFailed(Map<String, dynamic> error) {
-    // TODO: implement onRewardedVideoAdShowFailed
+  
     print("onRewardedVideoAdShowFailed : $error");
   }
 
@@ -256,8 +245,8 @@ class _MyAppState extends State<MyApp> with IronSourceListener {
 
   @override
   void onRewardedVideoAvailabilityChanged(bool available) {
-    // TODO: implement onRewardedVideoAvailabilityChanged
-    print("nRewardedVideoAvailabilityChanged : $available");
+   
+    print("onRewardedVideoAvailabilityChanged : $available");
     setState(() {
       rewardeVideoAvailable = available;
     });
@@ -267,13 +256,11 @@ class _MyAppState extends State<MyApp> with IronSourceListener {
 class BannerAdListener extends IronSourceBannerListener {
   @override
   void onBannerAdClicked() {
-    // TODO: implement onBannerAdClicked
     print("onBannerAdClicked");
   }
 
   @override
   void onBannerAdLeftApplication() {
-    // TODO: implement onBannerAdLeftApplication
     print("onBannerAdLeftApplication");
   }
 
@@ -281,24 +268,20 @@ class BannerAdListener extends IronSourceBannerListener {
   void onBannerAdLoadFailed(Map<String, dynamic> error) {
     print("onBannerAdLoadFailed");
 
-    // TODO: implement onBannerAdLoadFailed
   }
 
   @override
   void onBannerAdLoaded() {
-    // TODO: implement onBannerAdLoaded
     print("onBannerAdLoaded");
   }
 
   @override
   void onBannerAdScreenDismissed() {
-    // TODO: implement onBannerAdScreenDismissed
     print("onBannerAdScreenDismisse");
   }
 
   @override
   void onBannerAdScreenPresented() {
-    // TODO: implement onBannerAdScreenPresented
     print("onBannerAdScreenPresented");
   }
 }

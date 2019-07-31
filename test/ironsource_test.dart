@@ -1,6 +1,5 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ironsource/ironsource.dart';
 
 void main() {
   const MethodChannel channel = MethodChannel('ironsource');
@@ -15,7 +14,4 @@ void main() {
     channel.setMockMethodCallHandler(null);
   });
 
-  test('getPlatformVersion', () async {
-    expect(await IronSource.platformVersion, '42');
-  });
 }

@@ -1,6 +1,6 @@
 name: ironsource
-description: plugin to display ads from ironsource
-version: 0.0.1
+description: plugin to display banner ad (platform view), interstitial ad, rewarded video ad, and offerwall ads from IronSource (https://ironsrc.com). Currently support android only
+version: 0.1.0
 author: Ujang Karnadi<uk9313285@gmail.com>
 homepage: https://github.com/karnadii/ironsource
 
