@@ -6,20 +6,15 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
 
-import android.text.TextUtils;
-import android.util.Log;
-import android.os.AsyncTask;
 import android.app.Activity;
-//import android.view.View;
-//import android.os.Bundle;
+import android.os.AsyncTask;
+import android.text.TextUtils;
+
 import com.ironsource.adapters.supersonicads.SupersonicConfig;
-//import com.ironsource.mediationsdk.EBannerSize;
 import com.ironsource.mediationsdk.IronSource;
-import com.ironsource.mediationsdk.IronSourceBannerLayout;
 import com.ironsource.mediationsdk.integration.IntegrationHelper;
 import com.ironsource.mediationsdk.logger.IronSourceError;
 import com.ironsource.mediationsdk.model.Placement;
-import com.ironsource.mediationsdk.sdk.BannerListener;
 import com.ironsource.mediationsdk.sdk.InterstitialListener;
 import com.ironsource.mediationsdk.sdk.OfferwallListener;
 import com.ironsource.mediationsdk.sdk.RewardedVideoListener;
@@ -31,7 +26,7 @@ import java.util.Map;
 /**
  * IronsourcePlugin
  */
-public class IronsourcePlugin implements MethodCallHandler, InterstitialListener, OfferwallListener, RewardedVideoListener {
+public class IronsourcePlugin implements MethodCallHandler, InterstitialListener, RewardedVideoListener, OfferwallListener {
 
     public final String TAG = "IronsourcePlugin";
     public String APP_KEY = "85460dcd";
@@ -40,18 +35,29 @@ public class IronsourcePlugin implements MethodCallHandler, InterstitialListener
     public final Activity mActivity;
     public final MethodChannel mChannel;
 
+    public IronsourcePlugin(Activity activity, MethodChannel channel) {
+        this.mActivity = activity;
+        this.mChannel = channel;
+    }
+
     /**
      * Plugin registration.
      */
     public static void registerWith(Registrar registrar) {
         final MethodChannel channel = new MethodChannel(registrar.messenger(), IronSourceConsts.MAIN_CHANNEL);
         channel.setMethodCallHandler(new IronsourcePlugin(registrar.activity(), channel));
-        registrar.platformViewRegistry().registerViewFactory(IronSourceConsts.MAIN_CHANNEL+"/banner", new IronSourceBanner(registrar.activity(), registrar.messenger()));
+
+        final MethodChannel interstitialAdChannel = new MethodChannel(registrar.messenger(), IronSourceConsts.INTERSTITIAL_CHANNEL);
+
+        interstitialAdChannel
+                .setMethodCallHandler(new IronSourceInterstitial(registrar.context(),
+                        interstitialAdChannel, registrar.activity()));
+        registrar.platformViewRegistry().registerViewFactory(IronSourceConsts.BANNER_AD_CHANNEL, new IronSourceBanner(registrar.activity(), registrar.messenger()));
     }
+
 
     @Override
     public void onMethodCall(MethodCall call, Result result) {
-
         if (call.method.equals(IronSourceConsts.INIT) && call.hasArgument("appKey")) {
             initialize(call.<String>argument("appKey"));
             result.success(null);
@@ -79,11 +85,6 @@ public class IronsourcePlugin implements MethodCallHandler, InterstitialListener
     }
 
 
-    public IronsourcePlugin(Activity activity, MethodChannel channel) {
-        this.mActivity = activity;
-        this.mChannel = channel;
-    }
-
     public void initialize(String appKey) {
         APP_KEY = appKey;
         //The integrationHelper is used to validate the integration. Remove the integrationHelper before going live!
@@ -97,7 +98,7 @@ public class IronsourcePlugin implements MethodCallHandler, InterstitialListener
 
     public void startIronSourceInitTask() {
 
-        // getting advertiser id should be done on a background thread
+//         getting advertiser id should be done on a background thread
         AsyncTask<Void, Void, String> task = new AsyncTask<Void, Void, String>() {
             @Override
             protected String doInBackground(Void... params) {
@@ -117,177 +118,322 @@ public class IronsourcePlugin implements MethodCallHandler, InterstitialListener
     }
 
     public void initIronSource(String appKey, String userId) {
-        // Be sure to set a listener to each product that is being initiated
-        // set the IronSource rewarded video listener
+
+        // Set listener
         IronSource.setRewardedVideoListener(this);
-        // set the IronSource offerwall listener
         IronSource.setOfferwallListener(this);
-        // set client side callbacks for the offerwall
-        SupersonicConfig.getConfigObj().setClientSideCallbacks(true);
-        // set the interstitial listener
         IronSource.setInterstitialListener(this);
+
+//        SupersonicConfig.getConfigObj().setClientSideCallbacks(true);
+
 
         // set the IronSource user id
         IronSource.setUserId(userId);
         // init the IronSource SDK
         IronSource.init(mActivity, appKey);
 
-
-        // In order to work with IronSourceBanners you need to add Providers who support banner ad unit and uncomment next line
-        // createAndloadBanner();
     }
 
-
-    // --------- IronSource Rewarded Video Listener ---------
-
-    @Override
-    public void onRewardedVideoAdOpened() {
-        mChannel.invokeMethod(IronSourceConsts.ON_REWARDED_VIDEO_AD_OPENED, null);
-    }
-
-    @Override
-    public void onRewardedVideoAdClosed() {
-        mChannel.invokeMethod(IronSourceConsts.ON_REWARDED_VIDEO_AD_CLOSED, null);
-
-    }
-
-    @Override
-    public void onRewardedVideoAvailabilityChanged(boolean b) {
-        mChannel.invokeMethod(IronSourceConsts.ON_REWARDED_VIDEO_AVAILABILITY_CHANGED, b);
-
-    }
-
-    @Override
-    public void onRewardedVideoAdStarted() {
-        mChannel.invokeMethod(IronSourceConsts.ON_REWARDED_VIDEO_AD_STARTED, null);
-
-    }
-
-    @Override
-    public void onRewardedVideoAdEnded() {
-        mChannel.invokeMethod(IronSourceConsts.ON_REWARDED_VIDEO_AD_ENDED, null);
-
-    }
-
-    @Override
-    public void onRewardedVideoAdRewarded(Placement placement) {
-        mChannel.invokeMethod(IronSourceConsts.ON_REWARDED_VIDEO_AD_REWARDED, placement);
-    }
-
-    @Override
-    public void onRewardedVideoAdShowFailed(IronSourceError ironSourceError) {
-        Map<String, Object> arguments = new HashMap<String, Object>();
-        arguments.put("errorCode", ironSourceError.getErrorCode());
-        arguments.put("errorMessage", ironSourceError.getErrorMessage());
-        mChannel.invokeMethod(IronSourceConsts.ON_REWARDED_VIDEO_AD_SHOW_FAILED, arguments);
-    }
-
-    @Override
-    public void onRewardedVideoAdClicked(Placement placement) {
-        mChannel.invokeMethod(IronSourceConsts.ON_REWARDED_VIDEO_AD_CLICKED, placement);
-
-    }
-
-    // --------- IronSource Offerwall Listener ---------
-
-    @Override
-    public void onOfferwallAvailable(boolean available) {
-
-        mChannel.invokeMethod(IronSourceConsts.ON_OFFERWALL_AVAILABLE, available);
-
-    }
-
-    @Override
-    public void onOfferwallOpened() {
-        mChannel.invokeMethod(IronSourceConsts.ON_OFFERWALL_OPENED, null);
-    }
-
-    @Override
-    public void onOfferwallShowFailed(IronSourceError ironSourceError) {
-        Map<String, Object> arguments = new HashMap<String, Object>();
-        arguments.put("errorCode", ironSourceError.getErrorCode());
-        arguments.put("errorMessage", ironSourceError.getErrorMessage());
-        mChannel.invokeMethod(IronSourceConsts.ON_OFFERWALL_SHOW_FAILED, arguments);
-
-    }
-
-    @Override
-    public boolean onOfferwallAdCredited(int credits, int totalCredits, boolean totalCreditsFlag) {
-        Map<String, Object> arguments = new HashMap<String, Object>();
-        arguments.put("credits", credits);
-        arguments.put("totalCredits", totalCredits);
-        arguments.put("totalCreditsFlag", totalCreditsFlag);
-
-        mChannel.invokeMethod(IronSourceConsts.ON_OFFERWALL_AD_CREDITED, arguments);
-        return false;
-
-    }
-
-    @Override
-    public void onGetOfferwallCreditsFailed(IronSourceError ironSourceError) {
-        Map<String, Object> arguments = new HashMap<String, Object>();
-        arguments.put("errorCode", ironSourceError.getErrorCode());
-        arguments.put("errorMessage", ironSourceError.getErrorMessage());
-
-        mChannel.invokeMethod(IronSourceConsts.ON_OFFERWALL_CREDITS_FAILED, arguments);
-    }
-
-    @Override
-    public void onOfferwallClosed() {
-
-        mChannel.invokeMethod(IronSourceConsts.ON_OFFERWALL_CLOSED, null);
-
-    }
-
-    // --------- IronSource Interstitial Listener ---------
+    // Interstitial Listener
 
     @Override
     public void onInterstitialAdClicked() {
-        // called when the interstitial has been clicked
-        mChannel.invokeMethod(IronSourceConsts.ON_INTERSTITIAL_AD_CLICKED, null);
+        mActivity.runOnUiThread(
+                new Runnable() {
+                    public void run() {
+                        //back on UI thread...
+                        mChannel.invokeMethod(IronSourceConsts.ON_INTERSTITIAL_AD_CLICKED, null);
+                    }
+                }
+        );
+
     }
 
     @Override
     public void onInterstitialAdReady() {
-        mChannel.invokeMethod(IronSourceConsts.ON_INTERSTITIAL_AD_READY, null);
+        mActivity.runOnUiThread(
+                new Runnable() {
+                    public void run() {
+                        //back on UI thread...
+                        mChannel.invokeMethod(IronSourceConsts.ON_INTERSTITIAL_AD_READY, null);
+                    }
+                }
+        );
+
     }
 
     @Override
-    public void onInterstitialAdLoadFailed(IronSourceError ironSourceError) {
-        Map<String, Object> arguments = new HashMap<String, Object>();
-        arguments.put("errorCode", ironSourceError.getErrorCode());
-        arguments.put("errorMessage", ironSourceError.getErrorMessage());
-        mChannel.invokeMethod(IronSourceConsts.ON_INTERSTITIAL_AD_LOAD_FAILED, arguments);
+    public void onInterstitialAdLoadFailed(final IronSourceError ironSourceError) {
+        mActivity.runOnUiThread(
+                new Runnable() {
+                    public void run() {
+                        //back on UI thread...
+                        Map<String, Object> arguments = new HashMap<String, Object>();
+                        arguments.put("errorCode", ironSourceError.getErrorCode());
+                        arguments.put("errorMessage", ironSourceError.getErrorMessage());
+                        mChannel.invokeMethod(IronSourceConsts.ON_INTERSTITIAL_AD_LOAD_FAILED, arguments);
 
+                    }
+                }
+        );
     }
 
     @Override
     public void onInterstitialAdOpened() {
-        mChannel.invokeMethod(IronSourceConsts.ON_INTERSTITIAL_AD_OPENED, null);
+        mActivity.runOnUiThread(
+                new Runnable() {
+                    public void run() {
+                        //back on UI thread...
+                        mChannel.invokeMethod(IronSourceConsts.ON_INTERSTITIAL_AD_OPENED, null);
+
+                    }
+                }
+        );
 
     }
 
     @Override
     public void onInterstitialAdClosed() {
-        mChannel.invokeMethod(IronSourceConsts.ON_INTERSTITIAL_AD_CLOSED, null);
+        mActivity.runOnUiThread(
+                new Runnable() {
+                    public void run() {
+                        //back on UI thread...
+
+                        mChannel.invokeMethod(IronSourceConsts.ON_INTERSTITIAL_AD_CLOSED, null);
+                    }
+                }
+        );
 
 
     }
 
     @Override
     public void onInterstitialAdShowSucceeded() {
-        mChannel.invokeMethod(IronSourceConsts.ON_INTERSTITIAL_AD_SHOW_SUCCEEDED, null);
+        mActivity.runOnUiThread(
+                new Runnable() {
+                    public void run() {
+                        //back on UI thread...
+                        mChannel.invokeMethod(IronSourceConsts.ON_INTERSTITIAL_AD_SHOW_SUCCEEDED, null);
+                    }
+                }
+        );
+
 
     }
 
     @Override
-    public void onInterstitialAdShowFailed(IronSourceError ironSourceError) {
-        Map<String, Object> arguments = new HashMap<String, Object>();
-        arguments.put("errorCode", ironSourceError.getErrorCode());
-        arguments.put("errorMessage", ironSourceError.getErrorMessage());
-        mChannel.invokeMethod(IronSourceConsts.ON_INTERSTITIAL_AD_SHOW_FAILED, arguments);
+    public void onInterstitialAdShowFailed(final IronSourceError ironSourceError) {
+        mActivity.runOnUiThread(
+                new Runnable() {
+                    public void run() {
+                        //back on UI thread...
+                        Map<String, Object> arguments = new HashMap<String, Object>();
+                        arguments.put("errorCode", ironSourceError.getErrorCode());
+                        arguments.put("errorMessage", ironSourceError.getErrorMessage());
+                        mChannel.invokeMethod(IronSourceConsts.ON_INTERSTITIAL_AD_SHOW_FAILED, arguments);
+                    }
+                }
+        );
+
 
     }
 
+    // --------- IronSource Rewarded Video Listener ---------
+
+    @Override
+    public void onRewardedVideoAdOpened() {
+        // called when the video is opened
+        mActivity.runOnUiThread(
+                new Runnable() {
+                    public void run() {
+                        //back on UI thread...
+                        mChannel.invokeMethod(IronSourceConsts.ON_REWARDED_VIDEO_AD_OPENED, null);
+                    }
+                }
+        );
+
+    }
+
+    @Override
+    public void onRewardedVideoAdClosed() {
+        mActivity.runOnUiThread(
+                new Runnable() {
+                    public void run() {
+                        //back on UI thread...
+                        mChannel.invokeMethod(IronSourceConsts.ON_REWARDED_VIDEO_AD_CLOSED, null);
+                    }
+                }
+        );
+    }
+
+    @Override
+    public void onRewardedVideoAvailabilityChanged(final boolean b) {
+        // called when the video availbility has changed
+        mActivity.runOnUiThread(
+                new Runnable() {
+                    public void run() {
+                        //back on UI thread...
+                        mChannel.invokeMethod(IronSourceConsts.ON_REWARDED_VIDEO_AVAILABILITY_CHANGED, b);
+                    }
+                }
+        );
+
+    }
+
+    @Override
+    public void onRewardedVideoAdStarted() {
+        mActivity.runOnUiThread(
+                new Runnable() {
+                    public void run() {
+                        //back on UI thread...
+                        mChannel.invokeMethod(IronSourceConsts.ON_REWARDED_VIDEO_AD_STARTED, null);
+                    }
+                }
+        );
+    }
+
+    @Override
+    public void onRewardedVideoAdEnded() {
+        mActivity.runOnUiThread(
+                new Runnable() {
+                    public void run() {
+                        //back on UI thread...
+                        mChannel.invokeMethod(IronSourceConsts.ON_REWARDED_VIDEO_AD_ENDED, null);
+                    }
+                }
+        );
+    }
+
+    @Override
+    public void onRewardedVideoAdRewarded(final Placement placement) {
+        mActivity.runOnUiThread(
+                new Runnable() {
+                    public void run() {
+                        Map<String, Object> arguments = new HashMap<String, Object>();
+                        arguments.put("placementId",placement.getPlacementId());
+                        arguments.put("placementName", placement.getPlacementName());
+                        arguments.put("rewardAmount", placement.getRewardAmount());
+                        arguments.put("rewardName", placement.getRewardName());
+                        mChannel.invokeMethod(IronSourceConsts.ON_REWARDED_VIDEO_AD_REWARDED, arguments);
+                    }
+                }
+        );
+
+    }
+
+    @Override
+    public void onRewardedVideoAdShowFailed(final IronSourceError ironSourceError) {
+        mActivity.runOnUiThread(
+                new Runnable() {
+                    public void run() {
+                        Map<String, Object> arguments = new HashMap<String, Object>();
+                        arguments.put("errorCode", ironSourceError.getErrorCode());
+                        arguments.put("errorMessage", ironSourceError.getErrorMessage());
+                        mChannel.invokeMethod(IronSourceConsts.ON_REWARDED_VIDEO_AD_SHOW_FAILED, arguments);
+                    }
+                }
+        );
+
+    }
+
+    @Override
+    public void onRewardedVideoAdClicked(final Placement placement) {
+        mActivity.runOnUiThread(
+                new Runnable() {
+                    public void run() {
+                        Map<String, Object> arguments = new HashMap<String, Object>();
+                        arguments.put("placementId",placement.getPlacementId());
+                        arguments.put("placementName", placement.getPlacementName());
+                        arguments.put("rewardAmount", placement.getRewardAmount());
+                        arguments.put("rewardName", placement.getRewardName());
+                        mChannel.invokeMethod(IronSourceConsts.ON_REWARDED_VIDEO_AD_CLICKED, arguments);
+                    }
+                }
+        );
+
+    }
+
+    // --------- IronSource Offerwall Listener ---------
+
+    @Override
+    public void onOfferwallAvailable(final boolean available) {
+        mActivity.runOnUiThread(
+                new Runnable() {
+                    public void run() {
+                        //back on UI thread...
+                        mChannel.invokeMethod(IronSourceConsts.ON_OFFERWALL_AVAILABLE, available);
+                    }
+                }
+        );
+    }
+
+    @Override
+    public void onOfferwallOpened() {
+        mActivity.runOnUiThread(
+                new Runnable() {
+                    public void run() {
+                        //back on UI thread...
+                        mChannel.invokeMethod(IronSourceConsts.ON_OFFERWALL_OPENED, null);
+                    }
+                }
+        );
+    }
+
+    @Override
+    public void onOfferwallShowFailed(final IronSourceError ironSourceError) {
+        mActivity.runOnUiThread(
+                new Runnable() {
+                    public void run() {
+                        Map<String, Object> arguments = new HashMap<String, Object>();
+                        arguments.put("errorCode", ironSourceError.getErrorCode());
+                        arguments.put("errorMessage", ironSourceError.getErrorMessage());
+                        mChannel.invokeMethod(IronSourceConsts.ON_OFFERWALL_SHOW_FAILED, arguments);
+                    }
+                }
+        );
+    }
+
+    @Override
+    public boolean onOfferwallAdCredited(final int credits,final int totalCredits,final boolean totalCreditsFlag) {
+        mActivity.runOnUiThread(
+                new Runnable() {
+                    public void run() {
+                        Map<String, Object> arguments = new HashMap<String, Object>();
+                        arguments.put("credits", credits);
+                        arguments.put("totalCredits", totalCredits);
+                        arguments.put("totalCreditsFlag", totalCreditsFlag);
+                        mChannel.invokeMethod(IronSourceConsts.ON_OFFERWALL_AD_CREDITED, arguments);
+                    }
+                }
+        );
+        return false;
+    }
+
+    @Override
+    public void onGetOfferwallCreditsFailed(final IronSourceError ironSourceError) {
+        mActivity.runOnUiThread(
+                new Runnable() {
+                    public void run() {
+                        Map<String, Object> arguments = new HashMap<String, Object>();
+                        arguments.put("errorCode", ironSourceError.getErrorCode());
+                        arguments.put("errorMessage", ironSourceError.getErrorMessage());
+                        mChannel.invokeMethod(IronSourceConsts.ON_OFFERWALL_CREDITS_FAILED, arguments);
+                    }
+                }
+        );
+    }
+
+    @Override
+    public void onOfferwallClosed() {
+        mActivity.runOnUiThread(
+                new Runnable() {
+                    public void run() {
+                        //back on UI thread...
+                        mChannel.invokeMethod(IronSourceConsts.ON_OFFERWALL_CLOSED, null);
+                    }
+                }
+        );
+
+    }
 
 }
