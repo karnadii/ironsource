@@ -1,7 +1,7 @@
 name: ironsource
 description: plugin to display ads from ironsource
 version: 0.0.1
-author: Ujang Karnadi
+author: Ujang Karnadi<uk9313285@gmail.com>
 homepage: https://github.com/karnadii/ironsource
 
 environment:
