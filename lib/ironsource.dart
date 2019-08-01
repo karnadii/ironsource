@@ -37,6 +37,14 @@ class IronSource {
   static Future<bool> isInterstitialReady() async {
     return await _channel.invokeMethod('isInterstitialReady');
   }
+  static Future<Null> activityResumed() async {
+    await _channel.invokeMethod('activityResumed');
+  }
+
+  static Future<bool> activityPaused() async {
+    await _channel.invokeMethod('activityPaused');
+  }
+
 
   static Future<bool> isRewardedVideoAvailable() async {
     return await _channel.invokeMethod('isRewardedVideoAvailable');
