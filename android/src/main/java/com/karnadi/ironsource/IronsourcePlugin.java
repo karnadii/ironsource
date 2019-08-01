@@ -77,12 +77,23 @@ public class IronsourcePlugin implements MethodCallHandler, InterstitialListener
         } else if (call.method.equals(IronSourceConsts.SHOW_REWARDED_VIDEO)) {
             IronSource.showRewardedVideo();
             result.success(null);
-        }  else if (call.method.equals("activityResumed")) {
+        } else if (call.method.equals("activityResumed")) {
             IronSource.onResume(mActivity);
             result.success(null);
-        }  else if (call.method.equals("activityPaused")) {
+        } else if (call.method.equals("activityPaused")) {
             IronSource.onPause(mActivity);
             result.success(null);
+        } else if (call.method.equals("shouldTrackNetworkState") && call.hasArgument("state")) {
+            IronSource.shouldTrackNetworkState(mActivity, call.<Boolean>argument("state"));
+            result.success(null);
+        } else if (call.method.equals("validateIntegration")) {
+            IntegrationHelper.validateIntegration(mActivity);
+            result.success(null);
+        } else if(call.method.equals("setUserId")){
+            IronSource.setUserId(call.<String>argument("userId"));
+            result.success(null);
+        } else if (call.method.equals("getAdvertiserId")) {
+            result.success(IronSource.getAdvertiserId(mActivity));
         } else {
             result.notImplemented();
         }
@@ -90,49 +101,15 @@ public class IronsourcePlugin implements MethodCallHandler, InterstitialListener
 
 
     public void initialize(String appKey) {
-        APP_KEY = appKey;
-        //The integrationHelper is used to validate the integration. Remove the integrationHelper before going live!
-        IntegrationHelper.validateIntegration(mActivity);
 
-        startIronSourceInitTask();
-
-        //Network Connectivity Status
-        IronSource.shouldTrackNetworkState(mActivity, true);
-    }
-
-    public void startIronSourceInitTask() {
-
-//         getting advertiser id should be done on a background thread
-        AsyncTask<Void, Void, String> task = new AsyncTask<Void, Void, String>() {
-            @Override
-            protected String doInBackground(Void... params) {
-                return IronSource.getAdvertiserId(mActivity);
-            }
-
-            @Override
-            protected void onPostExecute(String advertisingId) {
-                if (TextUtils.isEmpty(advertisingId)) {
-                    advertisingId = FALLBACK_USER_ID;
-                }
-                // we're using an advertisingId as the 'userId'
-                initIronSource(APP_KEY, advertisingId);
-            }
-        };
-        task.execute();
-    }
-
-    public void initIronSource(String appKey, String userId) {
-
-        // Set listener
         IronSource.setInterstitialListener(this);
         IronSource.setRewardedVideoListener(this);
         IronSource.setOfferwallListener(this);
         SupersonicConfig.getConfigObj().setClientSideCallbacks(true);
-        // set the IronSource user id
-        IronSource.setUserId(userId);
-        // init the IronSource SDK
         IronSource.init(mActivity, appKey);
+
     }
+
 
     // Interstitial Listener
 
@@ -310,7 +287,7 @@ public class IronsourcePlugin implements MethodCallHandler, InterstitialListener
                 new Runnable() {
                     public void run() {
                         Map<String, Object> arguments = new HashMap<String, Object>();
-                        arguments.put("placementId",placement.getPlacementId());
+                        arguments.put("placementId", placement.getPlacementId());
                         arguments.put("placementName", placement.getPlacementName());
                         arguments.put("rewardAmount", placement.getRewardAmount());
                         arguments.put("rewardName", placement.getRewardName());
@@ -342,7 +319,7 @@ public class IronsourcePlugin implements MethodCallHandler, InterstitialListener
                 new Runnable() {
                     public void run() {
                         Map<String, Object> arguments = new HashMap<String, Object>();
-                        arguments.put("placementId",placement.getPlacementId());
+                        arguments.put("placementId", placement.getPlacementId());
                         arguments.put("placementName", placement.getPlacementName());
                         arguments.put("rewardAmount", placement.getRewardAmount());
                         arguments.put("rewardName", placement.getRewardName());
@@ -394,7 +371,7 @@ public class IronsourcePlugin implements MethodCallHandler, InterstitialListener
     }
 
     @Override
-    public boolean onOfferwallAdCredited(final int credits,final int totalCredits,final boolean totalCreditsFlag) {
+    public boolean onOfferwallAdCredited(final int credits, final int totalCredits, final boolean totalCreditsFlag) {
         mActivity.runOnUiThread(
                 new Runnable() {
                     public void run() {

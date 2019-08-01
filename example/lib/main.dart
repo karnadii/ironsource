@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:ironsource/ironsource.dart';
+import 'package:ironsource/models.dart';
 
 void main() => runApp(MyApp());
 
@@ -9,7 +10,7 @@ class MyApp extends StatefulWidget {
   _MyAppState createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> with IronSourceListener {
+class _MyAppState extends State<MyApp> with IronSourceListener , WidgetsBindingObserver{
   final String appKey = "85460dcd";
 
   bool rewardeVideoAvailable = false,
@@ -19,10 +20,34 @@ class _MyAppState extends State<MyApp> with IronSourceListener {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     init();
   }
 
+  @override
+void didChangeAppLifecycleState(AppLifecycleState state) { 
+ switch(state){
+
+   case AppLifecycleState.resumed:
+     IronSource.activityResumed();
+     break;
+   case AppLifecycleState.inactive:
+     // TODO: Handle this case.
+     break;
+   case AppLifecycleState.paused:
+     // TODO: Handle this case.
+      IronSource.activityPaused();
+     break;
+   case AppLifecycleState.suspending:
+     // TODO: Handle this case.
+     break;
+ }
+}
+
   void init() async {
+    var userId = await IronSource.getAdvertiserId();
+    await IronSource.validateIntegration();
+    await IronSource.setUserId(userId);
     await IronSource.initialize(appKey: appKey, listener: this);
     rewardeVideoAvailable = await IronSource.isRewardedVideoAvailable();
     offerwallAvailable = await IronSource.isOfferwallAvailable();
@@ -128,7 +153,7 @@ class _MyAppState extends State<MyApp> with IronSourceListener {
   }
 
   @override
-  void onInterstitialAdLoadFailed(Map<String, dynamic> error) {
+  void onInterstitialAdLoadFailed(IronSourceError error) {
       print("onInterstitialAdLoadFailed : $error");
   }
 
@@ -152,7 +177,7 @@ class _MyAppState extends State<MyApp> with IronSourceListener {
   }
 
   @override
-  void onInterstitialAdShowFailed(Map<String, dynamic> error) {
+  void onInterstitialAdShowFailed(IronSourceError error) {
 
     print("onInterstitialAdShowFailed : $error");
     setState(() {
@@ -166,13 +191,13 @@ class _MyAppState extends State<MyApp> with IronSourceListener {
   }
 
   @override
-  void onGetOfferwallCreditsFailed(Map<String, dynamic> error) {
+  void onGetOfferwallCreditsFailed(IronSourceError error) {
 
     print("onGetOfferwallCreditsFailed : $error");
   }
 
   @override
-  void onOfferwallAdCredited(Map<String, dynamic> reward) {
+  void onOfferwallAdCredited(OfferwallCredit reward) {
 
     print("onOfferwallAdCredited : $reward");
   }
@@ -197,12 +222,12 @@ class _MyAppState extends State<MyApp> with IronSourceListener {
   }
 
   @override
-  void onOfferwallShowFailed(Map<String, dynamic> error) {
+  void onOfferwallShowFailed(IronSourceError error) {
     print("onOfferwallShowFailed $error");
   }
 
   @override
-  void onRewardedVideoAdClicked(Map placement) {
+  void onRewardedVideoAdClicked(Placement placement) {
    
     print("onRewardedVideoAdClicked");
   }
@@ -227,13 +252,13 @@ class _MyAppState extends State<MyApp> with IronSourceListener {
   }
 
   @override
-  void onRewardedVideoAdRewarded(Map placement) {
+  void onRewardedVideoAdRewarded(Placement placement) {
 
-    print("onRewardedVideoAdRewarded: $placement");
+    print("onRewardedVideoAdRewarded: ${placement.placementName}");
   }
-
+ 
   @override
-  void onRewardedVideoAdShowFailed(Map<String, dynamic> error) {
+  void onRewardedVideoAdShowFailed(IronSourceError error) {
   
     print("onRewardedVideoAdShowFailed : $error");
   }

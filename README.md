@@ -51,20 +51,6 @@ follow [this](https://developers.ironsrc.com/ironsource-mobile/android/mediation
 ## Using this plugin
 see directory example 
 
-
-## App lifecycle
-use `IronSource.activityResumed()` and `IronSource.activityPaused()` with `WidgetsBindingObserver` or `SystemChannels.lifecycle.setMessageHandler`
-```dart
-SystemChannels.lifecycle.setMessageHandler((state){
-  if(state == "AppLifecycleState.paused"){
-      IronSource.activityPaused();
-  }else if(state == "AppLifecycleState.resumed"){
-      IronSource.activityResumed()
-  }
-});
-```
-
-
 Visit [IronSource](https://developers.ironsrc.com/ironsource-mobile/android/android-sdk/) website to know more 
 
 
