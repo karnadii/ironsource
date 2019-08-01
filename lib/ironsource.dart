@@ -59,7 +59,7 @@ class IronSource {
     await _channel.invokeMethod('activityResumed');
   }
 
-  static Future<bool> activityPaused() async {
+  static Future<Null> activityPaused() async {
     await _channel.invokeMethod('activityPaused');
   }
 
