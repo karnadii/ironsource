@@ -130,12 +130,12 @@ void didChangeAppLifecycleState(AppLifecycleState state) {
               ),
             ),
 // Banner ad
-            if (showBanner)
+            showBanner?
               Align(
                 alignment: Alignment.bottomCenter,
                 child: IronSourceBannerAd(
                     keepAlive: true, listener: BannerAdListener()),
-              )
+              ):SizedBox()
           ],
         ),
       ),
@@ -154,7 +154,7 @@ void didChangeAppLifecycleState(AppLifecycleState state) {
 
   @override
   void onInterstitialAdLoadFailed(IronSourceError error) {
-      print("onInterstitialAdLoadFailed : $error");
+      print("onInterstitialAdLoadFailed : ${error.toString()}");
   }
 
   @override
@@ -179,7 +179,7 @@ void didChangeAppLifecycleState(AppLifecycleState state) {
   @override
   void onInterstitialAdShowFailed(IronSourceError error) {
 
-    print("onInterstitialAdShowFailed : $error");
+    print("onInterstitialAdShowFailed : ${error.toString()}");
     setState(() {
       interstitialReady = false;
     });
@@ -193,7 +193,7 @@ void didChangeAppLifecycleState(AppLifecycleState state) {
   @override
   void onGetOfferwallCreditsFailed(IronSourceError error) {
 
-    print("onGetOfferwallCreditsFailed : $error");
+    print("onGetOfferwallCreditsFailed : ${error.toString()}");
   }
 
   @override
@@ -223,7 +223,7 @@ void didChangeAppLifecycleState(AppLifecycleState state) {
 
   @override
   void onOfferwallShowFailed(IronSourceError error) {
-    print("onOfferwallShowFailed $error");
+    print("onOfferwallShowFailed ${error.toString()}");
   }
 
   @override
@@ -260,7 +260,7 @@ void didChangeAppLifecycleState(AppLifecycleState state) {
   @override
   void onRewardedVideoAdShowFailed(IronSourceError error) {
   
-    print("onRewardedVideoAdShowFailed : $error");
+    print("onRewardedVideoAdShowFailed : ${error.toString()}");
   }
 
   @override

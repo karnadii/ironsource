@@ -24,7 +24,7 @@ class IronSourceBannerAd extends StatefulWidget {
     this.key,
     this.listener,
     this.keepAlive = false,
-  });
+  }) : super(key: key);
 
   @override
   _IronSourceBannerAdState createState() => _IronSourceBannerAdState();
@@ -40,6 +40,7 @@ class _IronSourceBannerAdState extends State<IronSourceBannerAd>
   BannerSize size = BannerSize.STANDARD;
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     if (defaultTargetPlatform == TargetPlatform.android) {
       return Container(
           width: size.width.toDouble(),
